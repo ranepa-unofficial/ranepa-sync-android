@@ -87,6 +87,16 @@ class FormatTest {
         assertEquals(2, state.days(state.lead!!).size)
     }
 
+    /** Запрос на другие дни: меняются только даты, остальное — как у страницы ЛК, иначе ответ 400. */
+    @Test fun scheduleTemplateKeepsQuery() {
+        val page = "https://my.ranepa.ru/lk/n-api/schedule?uid_org=x&type=group&filter[]=a&filter[]=b" +
+            "&dates[]=2026-10-19T00:00:00.000&dates[]=2026-10-20T00:00:00.000&branch_type=main"
+        val url = com.qteb.ranepa.sync.lk.ScheduleTemplate(page, emptyMap())
+            .with(listOf(date(2026, 10, 26, 0), date(2026, 10, 27, 0)))
+        assertEquals("https://my.ranepa.ru/lk/n-api/schedule?uid_org=x&type=group&filter[]=a&filter[]=b&branch_type=main" +
+            "&dates[]=2026-10-26T00:00:00.000&dates[]=2026-10-27T00:00:00.000", url)
+    }
+
     /** Копия политики в приложении совпадает с той, что в корне репозитория. */
     @Test fun privacyCopyIsCurrent() {
         val root = generateSequence(File("").absoluteFile) { it.parentFile }.first { File(it, "PRIVACY.md").exists() }

@@ -6,6 +6,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import com.qteb.ranepa.sync.BuildConfig
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceError
@@ -34,6 +36,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
+import java.net.URLDecoder
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -43,17 +46,20 @@ import kotlin.coroutines.resume
 /** Запрос расписания, который делает сама страница ЛК: в нём уже есть
  * uid_org, все группы и подгруппы студента и нужные заголовки. */
 data class ScheduleTemplate(val url: String, val headers: Map<String, String>) {
-    /** Тот же запрос на другие дни. */
+    /**
+     * Тот же запрос на другие дни. Строка запроса меняется как есть: остальные
+     * параметры не перекодируются, иначе ЛК отвечает 400.
+     */
     fun with(dates: List<Instant>): String {
-        val uri = Uri.parse(url)
-        val builder = uri.buildUpon().clearQuery()
-        for (name in uri.queryParameterNames) {
-            if (name == "dates[]") continue
-            for (value in uri.getQueryParameters(name)) builder.appendQueryParameter(name, value)
-        }
+        val q = url.indexOf('?')
+        if (q < 0) return url
+        val parts = url.substring(q + 1).split('&').filter { it.isNotEmpty() }
+        fun isDate(part: String) = URLDecoder.decode(part.substringBefore('='), Charsets.UTF_8) == "dates[]"
+        // Ключ — в том же написании, что у страницы: «dates[]» или «dates%5B%5D».
+        val key = parts.firstOrNull(::isDate)?.substringBefore('=') ?: "dates[]"
         val f = DateTimeFormatter.ofPattern("yyyy-MM-dd'T00:00:00.000'").withZone(ZoneId.systemDefault())
-        for (d in dates) builder.appendQueryParameter("dates[]", f.format(d))
-        return builder.build().toString()
+        val query = parts.filterNot(::isDate) + dates.map { "$key=${f.format(it)}" }
+        return url.substring(0, q + 1) + query.joinToString("&")
     }
 }
 
@@ -234,6 +240,11 @@ class LkWebView(context: Context) {
         withProfile: Boolean = true, withPhoto: Boolean = false, withPlan: Boolean = false,
     ): FetchResult = withContext(Dispatchers.Main) {
         val urls = (0 until weeks).map { w -> template.with((0 until 7).map { monday.addingDays(w * 7 + it) }) }
+        if (BuildConfig.DEBUG) {
+            Log.d("LK", "страница: ${template.url}")
+            Log.d("LK", "наш запрос: ${urls.first()}")
+            Log.d("LK", "заголовки: ${template.headers.keys}")
+        }
         val args = buildJsonObject {
             putJsonArray("urls") { urls.forEach { add(JsonPrimitive(it)) } }
             putJsonObject("headers") {
