@@ -9,3 +9,7 @@ keystore.properties
 *.iml
 .DS_Store
 captures/
+*.apk
+*.aab
+# Заметки к выпуску — локальные, в репозиторий не кладём.
+store/**/RELEASE*.md
