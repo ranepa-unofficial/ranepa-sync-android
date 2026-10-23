@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Расписание</string>
+    <string name="widget_next">Следующая пара</string>
+    <string name="widget_next_description">Сколько осталось до конца пары или до начала следующей</string>
+    <string name="widget_lessons">Пары</string>
+    <string name="widget_lessons_description">Пары на сегодня, а после последней — на завтра</string>
+    <string name="tile_today">Расписание</string>
+</resources>
