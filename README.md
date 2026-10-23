@@ -1,10 +1,23 @@
-# Расписание студента для Android
+# Расписание студента
 
-Неофициальное приложение с расписанием РАНХиГС. Расписание берётся из личного
-кабинета студента (my.ranepa.ru) и открывается сразу, без браузера и без входа
-в ЛК каждый раз. Версия для iPhone — [ranepa-sync-ios](https://github.com/ranepa-unofficial/ranepa-sync-ios).
+Неофициальное приложение для Android с расписанием РАНХиГС.
+Расписание берётся из личного кабинета студента (my.ranepa.ru) и открывается
+сразу, без браузера и без входа в ЛК каждый раз. Версия для iPhone —
+[ranepa-sync-ios](https://github.com/ranepa-unofficial/ranepa-sync-ios).
 
 > Приложение не связано с РАНХиГС и не поддерживается академией.
+
+<p align="center">
+  <img src="docs/images/schedule.jpg" width="24%" alt="Расписание">
+  <img src="docs/images/lesson.jpg" width="24%" alt="Карточка пары">
+  <img src="docs/images/session.jpg" width="24%" alt="Сессия">
+  <img src="docs/images/subject.jpg" width="24%" alt="Экран предмета">
+</p>
+
+## Установка
+
+Скачай APK из [последнего релиза](https://github.com/ranepa-unofficial/ranepa-sync-android/releases/latest)
+и открой его на телефоне. Нужен Android 8.0 или новее.
 
 ## Что умеет
 
@@ -12,41 +25,38 @@
 - Расписание до конца семестра, работает без интернета.
 - Уведомления о переносах, отменах и смене аудитории, напоминания о паре.
 - «Предметы» и «Сессия» из плана обучения: экзамены, зачёты, преподаватели.
-- Live Update: текущая пара в строке состояния и на экране блокировки (Android 16+).
-- Виджеты «Следующая пара» и «Пары», плитка в быстрых настройках, календарь «РАНХиГС».
-- Корпус на карте OpenStreetMap и выбор приложения карт: Яндекс Карты, 2ГИС, Google Maps.
+- Виджеты, Live Update, плитка в быстрых настройках, календарь «РАНХиГС».
+- Корпус на карте и выбор приложения карт: Яндекс Карты, 2ГИС, Google Maps.
 
 ## Приватность
 
 Своих серверов, аналитики и рекламы нет. Логин и пароль вводятся на настоящей
 странице ЛК, приложение их не видит. Всё хранится только на телефоне.
-Подробнее — в [политике конфиденциальности](PRIVACY.md).
+Подробнее — в [политике конфиденциальности](PRIVACY.md) и в разделе
+[«Вход и токены»](docs/auth.md).
+
+## Документация
+
+- [Вход и токены](docs/auth.md)
+- [Как обновляется расписание](docs/sync.md)
+- [Как это устроено](docs/architecture.md)
+- [Сборка и разработка](docs/development.md)
 
 ## Сборка
 
-Нужны JDK 21 и Android SDK (платформа 37).
+Нужны JDK 21 и Android SDK с платформой 37.
 
 ```bash
 ./gradlew assembleDebug
 ```
 
-Тесты:
+Тесты, демо-режим, релизы и своя сборка — в [docs/development.md](docs/development.md).
 
-```bash
-./gradlew testDebugUnitTest
-```
+## Состояние
 
-Демо-режим без ЛК — долгое нажатие на логотип на стартовом экране. В отладочной
-сборке в аккаунте есть раздел «Отладка»: ускоренный день, тестовые уведомления,
-перевод часов для скриншотов.
-
-## Релизы
-
-Тег `vX.Y.Z` запускает [release.yml](.github/workflows/release.yml): подписанные
-AAB и APK появляются в GitHub Releases. Нужны секреты репозитория
-`RELEASE_KEYSTORE_BASE64`, `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`,
-`RELEASE_KEY_PASSWORD`. Локально те же значения можно положить в
-`keystore.properties` (он в `.gitignore`).
+Версия 1.0 — первая для Android (Kotlin, Jetpack Compose, Material 3).
+Релизы с готовым APK — в [GitHub Releases](https://github.com/ranepa-unofficial/ranepa-sync-android/releases),
+закрытое тестирование — в RuStore.
 
 ## Лицензия
 
