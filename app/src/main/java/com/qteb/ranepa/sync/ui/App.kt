@@ -140,7 +140,9 @@ private fun MainFlow(state: AppState) {
             val lesson = state.sheetLesson
             val inPane = wide && state.tab == RootTab.SCHEDULE && nav.currentDestination?.route == "tabs" && state.sheetFrom == null
             if (lesson != null && !inPane) {
-                val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+                // Лист сразу по высоте содержимого, как карточка пары в iOS: без
+                // промежуточной высоты, на которой нижние строки обрезаны.
+                val sheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
                 ModalBottomSheet(
                     onDismissRequest = { state.sheetLesson = null },
                     sheetState = sheet,
