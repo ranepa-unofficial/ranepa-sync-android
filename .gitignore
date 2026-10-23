@@ -9,3 +9,5 @@ keystore.properties
 *.iml
 .DS_Store
 captures/
+*.apk
+*.aab
