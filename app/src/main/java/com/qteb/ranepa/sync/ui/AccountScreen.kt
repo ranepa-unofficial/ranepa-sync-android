@@ -77,6 +77,7 @@ import com.qteb.ranepa.sync.system.Alarms
 import com.qteb.ranepa.sync.system.CalendarExport
 import com.qteb.ranepa.sync.system.MapApp
 import com.qteb.ranepa.sync.system.Notifications
+import com.qteb.ranepa.sync.system.SupportLink
 import kotlinx.coroutines.launch
 
 private val reminderOptions = listOf(0, 5, 10, 15, 30, 60)
@@ -325,9 +326,6 @@ object Links {
     const val REPO = "https://github.com/ranepa-unofficial/ranepa-sync-android"
     const val PRIVACY_RAW = "https://raw.githubusercontent.com/ranepa-unofficial/ranepa-sync-android/main/PRIVACY.md"
     const val PRIVACY_CDN = "https://cdn.jsdelivr.net/gh/ranepa-unofficial/ranepa-sync-android@main/PRIVACY.md"
-
-    /** Чат с разработчиком; в поле ввода уже стоят версии приложения и Android. */
-    fun telegram(draft: String): Uri = Uri.parse("https://t.me/qtebest").buildUpon().appendQueryParameter("text", draft).build()
 }
 
 /** Версия, справка, конфиденциальность и связь с разработчиком. */
@@ -355,9 +353,10 @@ fun AboutScreen(onBack: () -> Unit, onLegend: () -> Unit, onPrivacy: () -> Unit)
             item { Box(Modifier.height(16.dp)) }
             section(null, listOf("telegram", "github")) { kind ->
                 if (kind == "telegram") {
-                    SettingRow({ Image(painterResource(R.drawable.ic_telegram), null, Modifier.size(40.dp)) }, "Написать в Telegram",
+                    // Бот поддержки: откроется Telegram, а без него — браузер.
+                    SettingRow({ Image(painterResource(R.drawable.ic_telegram), null, Modifier.size(40.dp)) }, "Поддержка в Telegram",
                         trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, null, Modifier.size(20.dp)) }) {
-                        open(context, Intent(Intent.ACTION_VIEW, Links.telegram("Расписание студента $version, Android ${Build.VERSION.RELEASE}")))
+                        open(context, Intent(Intent.ACTION_VIEW, SupportLink.uri(context)))
                     }
                 } else {
                     SettingRow({
