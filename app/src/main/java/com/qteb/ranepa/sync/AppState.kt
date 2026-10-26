@@ -29,6 +29,7 @@ import com.qteb.ranepa.sync.sync.FETCH_WEEKS
 import com.qteb.ranepa.sync.sync.SkipReason
 import com.qteb.ranepa.sync.sync.Sync
 import com.qteb.ranepa.sync.sync.SyncTrigger
+import com.qteb.ranepa.sync.system.Analytics
 import com.qteb.ranepa.sync.system.CalendarExport
 import com.qteb.ranepa.sync.system.LiveUpdates
 import com.qteb.ranepa.sync.system.Notifications
@@ -94,6 +95,7 @@ class AppState(application: Application) : AndroidViewModel(application) {
     var calendarExport by mutableStateOf(false); private set
     var liveUpdate by mutableStateOf(true); private set
     var themeMode by mutableStateOf(0); private set
+    var analytics by mutableStateOf(true); private set
     var fullName by mutableStateOf<String?>(null); private set
     var group by mutableStateOf<String?>(null); private set
     var program by mutableStateOf<String?>(null); private set
@@ -145,6 +147,7 @@ class AppState(application: Application) : AndroidViewModel(application) {
         calendarExport = d.bool(Keys.CALENDAR_EXPORT)
         liveUpdate = d.liveUpdate
         themeMode = d.int(Keys.THEME_MODE)
+        analytics = d.bool(Keys.ANALYTICS, true)
         fullName = d.string(Keys.FULL_NAME)
         group = d.string(Keys.GROUP)
         program = d.string(Keys.PROGRAM)
@@ -159,11 +162,12 @@ class AppState(application: Application) : AndroidViewModel(application) {
         minute = Clock.now
     }
 
-    /** Вызывается экраном входа, когда страница ЛК уже авторизована. */
-    suspend fun completeLogin(result: FetchResult, monday: Instant) {
+    /** Вызывается экраном входа, когда страница ЛК уже авторизована. [relogin] — вход после истёкшей сессии. */
+    suspend fun completeLogin(result: FetchResult, monday: Instant, relogin: Boolean = false) {
         error = null
         val sync = Sync.save(context, result, monday)
         loadCache()
+        if (demo) Analytics.stop() else if (!relogin) Analytics.send(context, "Login.completed")
         error = sync.sideEffectError
         if (!demo) Background.schedule(context, ExistingWorkPolicy.REPLACE)
         sessionCardHidden = false
@@ -210,10 +214,12 @@ class AppState(application: Application) : AndroidViewModel(application) {
                 error = LkError.ServerBusy(503, null).message
             }
         } catch (e: LkError.NeedLogin) {
+            Analytics.syncFailed(context, e, trigger)
             d.setBool(Keys.SESSION_EXPIRED, true)
             sessionCardHidden = false
             Notifications.cancelKeepAlive(context)
         } catch (e: Exception) {
+            Analytics.syncFailed(context, e, trigger)
             error = e.message
         } finally {
             loadCache()
@@ -260,6 +266,11 @@ class AppState(application: Application) : AndroidViewModel(application) {
     fun changeThemeMode(mode: Int) {
         d.setInt(Keys.THEME_MODE, mode)
         themeMode = mode
+    }
+
+    fun changeAnalytics(enabled: Boolean) {
+        Analytics.setEnabled(context, enabled)
+        analytics = enabled
     }
 
     fun mapsChanged() = Widgets.update(context)

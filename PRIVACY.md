@@ -1,14 +1,16 @@
 # Политика конфиденциальности «Расписание студента» для Android
 
-Дата вступления в силу: 23 октября 2026 г.
+Дата вступления в силу: 26 октября 2026 г.
 
 «Расписание студента» — неофициальное приложение для студентов РАНХиГС. Оно не связано с РАНХиГС и не поддерживается академией.
 
 ## Что приложение не делает
 
-- Не собирает и не передаёт разработчику никаких данных. У приложения нет своих серверов.
+- Не передаёт разработчику расписание, профиль, логин, ФИО и группу. У приложения нет своих серверов.
 - Не видит и не сохраняет логин и пароль от личного кабинета.
-- Не использует аналитику, рекламу и трекинг, не передаёт данные третьим лицам.
+- Не показывает рекламу, не следит за вами в других приложениях и не продаёт данные.
+
+Разработчик получает только анонимную статистику использования — см. раздел «Анонимная статистика».
 
 ## Как работает вход
 
@@ -29,6 +31,17 @@
 - Настройки приложения.
 
 Эти данные хранятся только на устройстве, во внутренней памяти приложения, и никуда не передаются. Они не попадают в резервные копии Android.
+
+## Анонимная статистика
+
+Чтобы понимать, сколько людей пользуется приложением и какие разделы нужны, приложение отправляет анонимную статистику в сервис TelemetryDeck (TelemetryDeck GmbH, Германия; данные хранятся в ЕС).
+
+- **Идентификатор.** При первом запуске приложение создаёт случайный идентификатор установки. На устройстве он хэшируется, TelemetryDeck хэширует его ещё раз и не может узнать, кто вы. Он не связан с логином, ФИО, группой или рекламным идентификатором и удаляется вместе с приложением.
+- **События:** открытие приложения; первый вход в ЛК (без логина); неудачное обновление расписания и его причина (нет связи, истекла сессия, ЛК недоступен); открытие разделов «Предметы», «Сессия», «Поиск», «Аккаунт», «О приложении»; нажатие «Поддержка в Telegram»; раз в день — настройки: время напоминания, разрешены ли уведомления, включены ли календарь и Live Update, есть ли виджет, оформление.
+- **Вместе с событиями** передаются версия приложения и Android, модель телефона, язык, регион и часовой пояс, размер экрана и настройки специальных возможностей.
+- Статистика отправляется, только когда приложение открыто на экране. Фоновые обновления, виджеты и напоминания ничего не отправляют. В демо-режиме статистики нет.
+
+Выключить статистику можно переключателем «Анонимная статистика» на экране аккаунта — после этого приложение ничего не отправляет. Обработку данных регулирует политика TelemetryDeck: https://telemetrydeck.com/privacy/
 
 ## Карта корпуса
 
@@ -74,15 +87,17 @@ Google Play и RuStore могут собирать отчёты о сбоях и
 
 # Privacy Policy — "Расписание студента" (Student Timetable) for Android
 
-Effective date: October 23, 2026
+Effective date: October 26, 2026
 
 This is an unofficial app for RANEPA students. It is not affiliated with or endorsed by RANEPA.
 
 ## What the app does not do
 
-- It does not collect any data or send it to the developer. The app has no servers of its own.
+- It never sends your timetable, profile, username, full name or group to the developer. The app has no servers of its own.
 - It never sees or stores your student portal username or password.
-- It uses no analytics, advertising or tracking, and shares no data with third parties.
+- It shows no ads, does not track you across other apps and does not sell data.
+
+The developer receives only anonymous usage statistics; see "Anonymous statistics".
 
 ## How sign-in works
 
@@ -103,6 +118,17 @@ RANEPA's own policies govern how the portal handles your data.
 - App settings.
 
 This data stays on your device, in the app's private storage, and is never transmitted elsewhere. It is excluded from Android backups.
+
+## Anonymous statistics
+
+To understand how many people use the app and which sections matter, the app sends anonymous statistics to TelemetryDeck (TelemetryDeck GmbH, Germany; data is stored in the EU).
+
+- **Identifier.** On first launch the app creates a random installation identifier. It is hashed on the device and hashed again by TelemetryDeck, which cannot tell who you are. It is not linked to your username, name, group or advertising ID, and it is deleted with the app.
+- **Events:** opening the app; first sign-in to the portal (without the username); a failed timetable update and its reason (no connection, session expired, portal unavailable); opening Subjects, Exams, Search, Account or About; tapping "Support in Telegram"; once a day, settings: reminder time, whether notifications are allowed, whether calendar export and Live Update are on, whether a widget is placed, and the theme.
+- **With each event** the app sends the app and Android versions, phone model, language, region and time zone, screen size and accessibility settings.
+- Statistics are sent only while the app is open on screen. Background updates, widgets and reminders send nothing. Demo mode sends nothing.
+
+You can turn statistics off with the "Анонимная статистика" (Anonymous statistics) switch on the account screen; after that the app sends nothing. TelemetryDeck's policy applies: https://telemetrydeck.com/privacy/
 
 ## Campus map
 

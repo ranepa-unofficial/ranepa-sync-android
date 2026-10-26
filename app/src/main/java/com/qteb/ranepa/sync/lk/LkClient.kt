@@ -83,6 +83,8 @@ sealed class LkError(message: String) : Exception(message) {
     /** ЛК перегружен или лежит (429, 5xx): обновления ставятся на паузу. */
     class ServerBusy(val status: Int, val retryAfter: Int?) : LkError("ЛК сейчас недоступен, попробую позже")
     class Message(text: String) : LkError(text)
+    /** Нет связи или ЛК не ответил вовремя. */
+    class Network(text: String) : LkError(text)
 
     companion object {
         fun busy(status: Int) = status == 429 || status >= 500
@@ -119,7 +121,7 @@ class LkWebView(context: Context) {
                 val template = withTimeout(60_000) { lk.waitForTemplate() }
                 lk.fetch(template, monday, weeks, stopAfterEmpty, withProfile, withPhoto, withPlan)
             } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                throw LkError.Message("ЛК не ответил за минуту, попробуй позже")
+                throw LkError.Network("ЛК не ответил за минуту, попробуй позже")
             } finally {
                 lk.destroy()
             }
@@ -193,7 +195,7 @@ class LkWebView(context: Context) {
             override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
                 if (!request.isForMainFrame) return
                 onLoading?.invoke(false)
-                onFailure?.invoke(LkError.Message("Нет связи с ЛК: ${error.description}"))
+                onFailure?.invoke(LkError.Network("Нет связи с ЛК: ${error.description}"))
             }
 
             override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, response: WebResourceResponse) {
@@ -267,7 +269,7 @@ class LkWebView(context: Context) {
             withTimeout(120_000) { deferred.await() }
         } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
             results.remove(id)
-            throw LkError.Message("ЛК не ответил вовремя, попробуй позже")
+            throw LkError.Network("ЛК не ответил вовремя, попробуй позже")
         }
         val data = runCatching { json.parseToJsonElement(raw).jsonObject }.getOrNull()
             ?: throw LkError.Message("Сайт ответил непонятно")

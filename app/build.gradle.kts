@@ -26,6 +26,8 @@ android {
         versionCode = 3
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Анонимная статистика: пустой App ID — SDK не запускается.
+        buildConfigField("String", "TELEMETRYDECK_APP_ID", "\"${providers.gradleProperty("telemetrydeck.appId").getOrElse("")}\"")
     }
 
     signingConfigs {
@@ -89,6 +91,7 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.serialization.json)
     implementation(libs.osmdroid)
+    implementation(libs.telemetrydeck)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 

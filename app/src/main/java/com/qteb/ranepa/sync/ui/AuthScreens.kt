@@ -186,7 +186,7 @@ fun LoginScreen(state: AppState, relogin: Boolean, onDone: () -> Unit, onBack: (
                 val result = lk.fetch(template, monday, SEMESTER_WEEKS, stopAfterEmpty = EMPTY_WEEKS_TO_STOP,
                     withPhoto = true, withPlan = true)
                 timeout?.cancel()
-                state.completeLogin(result, monday)
+                state.completeLogin(result, monday, relogin)
                 onDone()
             } catch (e: Exception) {
                 fail(e)

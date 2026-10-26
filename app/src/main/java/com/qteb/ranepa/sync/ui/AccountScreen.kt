@@ -30,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.outlined.AccessAlarm
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Notifications
@@ -77,6 +78,7 @@ import com.qteb.ranepa.sync.system.Alarms
 import com.qteb.ranepa.sync.system.CalendarExport
 import com.qteb.ranepa.sync.system.MapApp
 import com.qteb.ranepa.sync.system.Notifications
+import com.qteb.ranepa.sync.system.Analytics
 import com.qteb.ranepa.sync.system.SupportLink
 import kotlinx.coroutines.launch
 
@@ -214,6 +216,12 @@ fun AccountScreen(state: AppState, onBack: () -> Unit, onAbout: () -> Unit) {
                     SettingRow({ SettingIcon(Icons.Outlined.DarkMode, Color(0xFFE4DEFF), Color(0xFF3A2A86)) }, "Оформление",
                         themes[state.themeMode]) { dialog = "theme" }
                 }
+                if (Analytics.available && !state.demo) {
+                    add {
+                        SettingRow({ SettingIcon(Icons.Outlined.Insights, Color(0xFFDDE3EA), Color(0xFF2B3A4A)) }, "Анонимная статистика",
+                            trailing = { Switch(checked = state.analytics, onCheckedChange = state::changeAnalytics) })
+                    }
+                }
             }
             section(null, rows) { it() }
             item { SectionFooter(footer(state)) }
@@ -273,6 +281,7 @@ private fun footer(state: AppState): String {
     parts += state.lastBackgroundRun?.let {
         "Последнее фоновое обновление — ${if (it.sameDay(Clock.now)) "сегодня" else shortDate(it)} в ${hm(it)}."
     } ?: "В фоне ещё не обновлялось."
+    if (Analytics.available) parts += "Анонимная статистика — сколько пользователей и какие экраны открывают. Без логина, ФИО и группы."
     return parts.joinToString(" ")
 }
 
@@ -356,6 +365,7 @@ fun AboutScreen(onBack: () -> Unit, onLegend: () -> Unit, onPrivacy: () -> Unit)
                     // Бот поддержки: откроется Telegram, а без него — браузер.
                     SettingRow({ Image(painterResource(R.drawable.ic_telegram), null, Modifier.size(40.dp)) }, "Поддержка в Telegram",
                         trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, null, Modifier.size(20.dp)) }) {
+                        Analytics.send(context, "Support.opened")
                         open(context, Intent(Intent.ACTION_VIEW, SupportLink.uri(context)))
                     }
                 } else {
