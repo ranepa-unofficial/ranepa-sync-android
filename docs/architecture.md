@@ -53,7 +53,7 @@
   экране карточка пары — рядом с лентой.
 - **Статистика.** Анонимная, через TelemetryDeck: SDK запускается из
   `MainActivity.onStart`, только с App ID в сборке (`telemetrydeck.appId` в
-  `gradle.properties`), не в демо и пока включён переключатель. Сессии и новые
+  `gradle.properties`) и не в демо. Сессии и новые
   установки SDK отмечает сам; свои события — `Login.completed`, `Sync.failed`,
   `Screen.opened`, `Support.opened` и раз в день `Settings.daily`, схема общая
   с iOS ([`system/Analytics.kt`](../app/src/main/java/com/qteb/ranepa/sync/system/Analytics.kt)).

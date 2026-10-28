@@ -41,7 +41,7 @@
 - **Вместе с событиями** передаются версия приложения и Android, модель телефона, язык, регион и часовой пояс, размер экрана и настройки специальных возможностей.
 - Статистика отправляется, только когда приложение открыто на экране. Фоновые обновления, виджеты и напоминания ничего не отправляют. В демо-режиме статистики нет.
 
-Выключить статистику можно переключателем «Анонимная статистика» на экране аккаунта — после этого приложение ничего не отправляет. Обработку данных регулирует политика TelemetryDeck: https://telemetrydeck.com/privacy/
+Обработку данных регулирует политика TelemetryDeck: https://telemetrydeck.com/privacy/
 
 ## Карта корпуса
 
@@ -128,7 +128,7 @@ To understand how many people use the app and which sections matter, the app sen
 - **With each event** the app sends the app and Android versions, phone model, language, region and time zone, screen size and accessibility settings.
 - Statistics are sent only while the app is open on screen. Background updates, widgets and reminders send nothing. Demo mode sends nothing.
 
-You can turn statistics off with the "Анонимная статистика" (Anonymous statistics) switch on the account screen; after that the app sends nothing. TelemetryDeck's policy applies: https://telemetrydeck.com/privacy/
+TelemetryDeck's policy applies: https://telemetrydeck.com/privacy/
 
 ## Campus map
 

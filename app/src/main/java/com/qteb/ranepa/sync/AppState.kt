@@ -95,7 +95,6 @@ class AppState(application: Application) : AndroidViewModel(application) {
     var calendarExport by mutableStateOf(false); private set
     var liveUpdate by mutableStateOf(true); private set
     var themeMode by mutableStateOf(0); private set
-    var analytics by mutableStateOf(true); private set
     var fullName by mutableStateOf<String?>(null); private set
     var group by mutableStateOf<String?>(null); private set
     var program by mutableStateOf<String?>(null); private set
@@ -147,7 +146,6 @@ class AppState(application: Application) : AndroidViewModel(application) {
         calendarExport = d.bool(Keys.CALENDAR_EXPORT)
         liveUpdate = d.liveUpdate
         themeMode = d.int(Keys.THEME_MODE)
-        analytics = d.bool(Keys.ANALYTICS, true)
         fullName = d.string(Keys.FULL_NAME)
         group = d.string(Keys.GROUP)
         program = d.string(Keys.PROGRAM)
@@ -266,11 +264,6 @@ class AppState(application: Application) : AndroidViewModel(application) {
     fun changeThemeMode(mode: Int) {
         d.setInt(Keys.THEME_MODE, mode)
         themeMode = mode
-    }
-
-    fun changeAnalytics(enabled: Boolean) {
-        Analytics.setEnabled(context, enabled)
-        analytics = enabled
     }
 
     fun mapsChanged() = Widgets.update(context)

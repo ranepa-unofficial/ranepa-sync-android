@@ -44,8 +44,6 @@ object Keys {
     const val PLAN = "plan"
     /** Точки корпусов, найденные геокодером: адрес → широта и долгота. */
     const val PLACES = "places"
-    /** Анонимная статистика включена (по умолчанию да). Не сбрасывается при выходе. */
-    const val ANALYTICS = "analytics"
     /** Последний день, за который отправлены настройки, — «2026-10-26». */
     const val ANALYTICS_DAY = "analyticsDay"
 

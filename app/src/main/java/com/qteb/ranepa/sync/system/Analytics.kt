@@ -18,13 +18,13 @@ import java.time.LocalDate
  * Анонимная статистика через TelemetryDeck: сколько пользователей, как часто
  * открывают приложение и какие экраны. Схема событий общая с iOS-версией.
  * SDK запускается только на экране — фон, виджеты и будильники ничего не шлют.
- * Без App ID в сборке, в демо и с выключенным переключателем статистики нет.
+ * Без App ID в сборке и в демо статистики нет.
  */
 object Analytics {
-    /** В сборке есть App ID: только тогда показываем переключатель. */
+    /** В сборке есть App ID. */
     val available: Boolean get() = BuildConfig.TELEMETRYDECK_APP_ID.isNotBlank()
 
-    fun enabled(d: Store): Boolean = available && !d.demo && d.bool(Keys.ANALYTICS, true)
+    fun enabled(d: Store): Boolean = available && !d.demo
 
     /** Приложение на экране. Сессию и новую установку SDK отмечает сам, раз в день — настройки. */
     fun foreground(context: Context) {
@@ -39,11 +39,6 @@ object Analytics {
             send(context, "Settings.daily", settings(context, d))
             d.setString(Keys.ANALYTICS_DAY, today)
         }
-    }
-
-    fun setEnabled(context: Context, enabled: Boolean) {
-        Store(context).setBool(Keys.ANALYTICS, enabled)
-        if (enabled) foreground(context) else stop()
     }
 
     fun stop() = TelemetryDeck.stop()
