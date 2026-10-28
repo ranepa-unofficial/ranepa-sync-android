@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import com.qteb.ranepa.sync.core.Clock
 import com.qteb.ranepa.sync.core.Store
 import com.qteb.ranepa.sync.sync.Background
+import com.qteb.ranepa.sync.system.Analytics
 import com.qteb.ranepa.sync.system.Notifications
 import com.qteb.ranepa.sync.system.TodayTile
 import com.qteb.ranepa.sync.ui.App
@@ -45,6 +46,11 @@ class MainActivity : ComponentActivity() {
                 App(state)
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Analytics.foreground(this)
     }
 
     override fun onNewIntent(intent: Intent) {

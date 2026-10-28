@@ -48,6 +48,12 @@
             </intent-filter>
         </activity>
 
+        <!-- TelemetryDeck запускается из кода и только на экране, а не при старте процесса. -->
+        <provider
+            android:name="com.telemetrydeck.sdk.TelemetryDeckInitProvider"
+            android:authorities="${applicationId}.TelemetryDeckInitProvider"
+            tools:node="remove" />
+
         <receiver android:name=".system.AlarmReceiver" android:exported="false" />
 
         <receiver android:name=".system.RestoreReceiver" android:exported="true">

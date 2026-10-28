@@ -51,3 +51,9 @@
 - **Интерфейс.** Jetpack Compose на Material 3: цвета Material You из обоев
   (на Android 12+), навигация снизу на телефоне и сбоку на планшете, на широком
   экране карточка пары — рядом с лентой.
+- **Статистика.** Анонимная, через TelemetryDeck: SDK запускается из
+  `MainActivity.onStart`, только с App ID в сборке (`telemetrydeck.appId` в
+  `gradle.properties`) и не в демо. Сессии и новые
+  установки SDK отмечает сам; свои события — `Login.completed`, `Sync.failed`,
+  `Screen.opened`, `Support.opened` и раз в день `Settings.daily`, схема общая
+  с iOS ([`system/Analytics.kt`](../app/src/main/java/com/qteb/ranepa/sync/system/Analytics.kt)).

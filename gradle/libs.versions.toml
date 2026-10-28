@@ -13,6 +13,7 @@ webkit = "1.18.0"
 coroutines = "1.11.0"
 serialization = "1.12.0"
 osmdroid = "6.1.20"
+telemetrydeck = "7.2.0"
 junit = "4.13.2"
 robolectric = "4.17"
 roborazzi = "1.77.0"
@@ -41,6 +42,7 @@ coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-androi
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 osmdroid = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
+telemetrydeck = { module = "com.telemetrydeck:kotlin-sdk", version.ref = "telemetrydeck" }
 junit = { module = "junit:junit", version.ref = "junit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = "roborazzi" }

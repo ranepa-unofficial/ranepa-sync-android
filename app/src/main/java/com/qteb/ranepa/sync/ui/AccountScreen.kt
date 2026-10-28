@@ -77,6 +77,7 @@ import com.qteb.ranepa.sync.system.Alarms
 import com.qteb.ranepa.sync.system.CalendarExport
 import com.qteb.ranepa.sync.system.MapApp
 import com.qteb.ranepa.sync.system.Notifications
+import com.qteb.ranepa.sync.system.Analytics
 import com.qteb.ranepa.sync.system.SupportLink
 import kotlinx.coroutines.launch
 
@@ -356,6 +357,7 @@ fun AboutScreen(onBack: () -> Unit, onLegend: () -> Unit, onPrivacy: () -> Unit)
                     // Бот поддержки: откроется Telegram, а без него — браузер.
                     SettingRow({ Image(painterResource(R.drawable.ic_telegram), null, Modifier.size(40.dp)) }, "Поддержка в Telegram",
                         trailing = { Icon(Icons.AutoMirrored.Filled.OpenInNew, null, Modifier.size(20.dp)) }) {
+                        Analytics.send(context, "Support.opened")
                         open(context, Intent(Intent.ACTION_VIEW, SupportLink.uri(context)))
                     }
                 } else {

@@ -46,6 +46,7 @@ import com.qteb.ranepa.sync.RootTab
 import com.qteb.ranepa.sync.core.Clock
 import com.qteb.ranepa.sync.core.Store
 import com.qteb.ranepa.sync.sync.SyncTrigger
+import com.qteb.ranepa.sync.system.Analytics
 
 /** Переходы, доступные любому экрану и карточке пары. */
 class Routes(private val nav: NavHostController?, private val state: AppState?) {
@@ -124,7 +125,12 @@ private fun MainFlow(state: AppState) {
                     composable("lecturer/{name}") { LecturerScreen(state, it.arguments?.getString("name").orEmpty()) { nav.popBackStack() } }
                     composable("plan") { PlanScreen(state) { nav.popBackStack() } }
                     composable("search") { SearchScreen(state) { nav.popBackStack() } }
-                    composable("account") { AccountScreen(state, onBack = { nav.popBackStack() }, onAbout = { nav.navigate("about") }) }
+                    composable("account") {
+                        AccountScreen(state, onBack = { nav.popBackStack() }, onAbout = {
+                            Analytics.screen(context, "about")
+                            nav.navigate("about")
+                        })
+                    }
                     composable("about") {
                         AboutScreen(onBack = { nav.popBackStack() }, onLegend = { nav.navigate("legend") }, onPrivacy = { nav.navigate("privacy") })
                     }
@@ -157,6 +163,7 @@ private fun MainFlow(state: AppState) {
 
 @Composable
 private fun Tabs(state: AppState, wide: Boolean, nav: NavHostController) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val now = Clock.now
     val session = state.session
     // Во время сессии на значке — сколько осталось сдавать.
@@ -167,7 +174,10 @@ private fun Tabs(state: AppState, wide: Boolean, nav: NavHostController) {
                 val selected = state.tab == item.tab
                 item(
                     selected = selected,
-                    onClick = { state.tab = item.tab },
+                    onClick = {
+                        if (state.tab != item.tab && item.tab != RootTab.SCHEDULE) Analytics.screen(context, item.tab.name.lowercase())
+                        state.tab = item.tab
+                    },
                     icon = {
                         if (item.tab == RootTab.SESSION && badge > 0) {
                             BadgedBox(badge = { Badge { Text("$badge") } }) { Icon(if (selected) item.selectedIcon else item.icon, null) }
@@ -180,8 +190,14 @@ private fun Tabs(state: AppState, wide: Boolean, nav: NavHostController) {
             }
         },
     ) {
-        val onSearch = { nav.navigate("search") { launchSingleTop = true } }
-        val onAccount = { nav.navigate("account") { launchSingleTop = true } }
+        val onSearch = {
+            Analytics.screen(context, "search")
+            nav.navigate("search") { launchSingleTop = true }
+        }
+        val onAccount = {
+            Analytics.screen(context, "account")
+            nav.navigate("account") { launchSingleTop = true }
+        }
         // Вкладки без своей панели: шапка начинается под строкой состояния.
         Box(Modifier.fillMaxSize().statusBarsPadding()) {
             when (state.tab) {
