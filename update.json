@@ -1,0 +1,11 @@
+{
+  "github": {
+    "latest": "1.0.1",
+    "latestCode": 4,
+    "url": "https://github.com/ranepa-unofficial/ranepa-sync-android/releases/latest"
+  },
+  "minimum": {
+    "version": "1.0.0",
+    "code": 0
+  }
+}

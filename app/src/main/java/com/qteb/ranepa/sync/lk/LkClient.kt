@@ -76,6 +76,8 @@ data class FetchResult(
     val sessionUntil: Instant? = null,
     /** План обучения (JSON StudyPlan) — при загрузке семестра. */
     val plan: String? = null,
+    /** Текущая успеваемость: ответ ЛК как есть (`dashboard/progress`). */
+    val progress: JsonObject? = null,
 )
 
 sealed class LkError(message: String) : Exception(message) {
@@ -112,14 +114,14 @@ class LkWebView(context: Context) {
          */
         suspend fun refresh(
             context: Context, monday: Instant, weeks: Int, stopAfterEmpty: Int? = null,
-            withProfile: Boolean, withPhoto: Boolean, withPlan: Boolean = false,
+            withProfile: Boolean, withPhoto: Boolean, withPlan: Boolean = false, withProgress: Boolean = false,
         ): FetchResult = withContext(Dispatchers.Main) {
             val lk = LkWebView(context.applicationContext)
             // Размер, как у телефона: страница ЛК строит мобильную вёрстку.
             lk.webView.layout(0, 0, 400, 800)
             try {
                 val template = withTimeout(60_000) { lk.waitForTemplate() }
-                lk.fetch(template, monday, weeks, stopAfterEmpty, withProfile, withPhoto, withPlan)
+                lk.fetch(template, monday, weeks, stopAfterEmpty, withProfile, withPhoto, withPlan, withProgress)
             } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
                 throw LkError.Network("ЛК не ответил за минуту, попробуй позже")
             } finally {
@@ -240,6 +242,7 @@ class LkWebView(context: Context) {
     suspend fun fetch(
         template: ScheduleTemplate, monday: Instant, weeks: Int, stopAfterEmpty: Int? = null,
         withProfile: Boolean = true, withPhoto: Boolean = false, withPlan: Boolean = false,
+        withProgress: Boolean = false,
     ): FetchResult = withContext(Dispatchers.Main) {
         val urls = (0 until weeks).map { w -> template.with((0 until 7).map { monday.addingDays(w * 7 + it) }) }
         if (BuildConfig.DEBUG) {
@@ -260,6 +263,7 @@ class LkWebView(context: Context) {
             put("withProfile", withProfile)
             put("withPhoto", withPhoto)
             put("withPlan", withPlan && withProfile)
+            put("withProgress", withProgress)
         }
         val id = UUID.randomUUID().toString()
         val deferred = CompletableDeferred<String>()
@@ -290,6 +294,7 @@ class LkWebView(context: Context) {
             photo = text("photo"),
             sessionUntil = (data["sessionUntil"] as? JsonPrimitive)?.doubleOrNull?.let { Instant.ofEpochSecond(it.toLong()) },
             plan = (data["plan"] as? JsonObject)?.toString(),
+            progress = data["progress"] as? JsonObject,
         )
     }
 }

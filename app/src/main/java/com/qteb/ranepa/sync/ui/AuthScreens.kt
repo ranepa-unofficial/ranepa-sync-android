@@ -184,7 +184,7 @@ fun LoginScreen(state: AppState, relogin: Boolean, onDone: () -> Unit, onBack: (
             try {
                 val monday: Instant = Clock.now.monday
                 val result = lk.fetch(template, monday, SEMESTER_WEEKS, stopAfterEmpty = EMPTY_WEEKS_TO_STOP,
-                    withPhoto = true, withPlan = true)
+                    withPhoto = true, withPlan = true, withProgress = true)
                 timeout?.cancel()
                 state.completeLogin(result, monday, relogin)
                 onDone()

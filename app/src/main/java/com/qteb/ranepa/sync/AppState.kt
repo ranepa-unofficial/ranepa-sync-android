@@ -15,7 +15,9 @@ import com.qteb.ranepa.sync.core.Clock
 import com.qteb.ranepa.sync.core.ExamSession
 import com.qteb.ranepa.sync.core.Keys
 import com.qteb.ranepa.sync.core.Lesson
+import com.qteb.ranepa.sync.core.Progress
 import com.qteb.ranepa.sync.core.StudyPlan
+import com.qteb.ranepa.sync.core.progress
 import com.qteb.ranepa.sync.core.Store
 import com.qteb.ranepa.sync.core.daysSince
 import com.qteb.ranepa.sync.core.monday
@@ -30,6 +32,7 @@ import com.qteb.ranepa.sync.sync.SkipReason
 import com.qteb.ranepa.sync.sync.Sync
 import com.qteb.ranepa.sync.sync.SyncTrigger
 import com.qteb.ranepa.sync.system.Analytics
+import com.qteb.ranepa.sync.system.AppVisibility
 import com.qteb.ranepa.sync.system.CalendarExport
 import com.qteb.ranepa.sync.system.LiveUpdates
 import com.qteb.ranepa.sync.system.Notifications
@@ -101,6 +104,9 @@ class AppState(application: Application) : AndroidViewModel(application) {
     var photo by mutableStateOf<ImageBitmap?>(null); private set
     /** План обучения из ЛК; null — ещё не загружался. */
     var plan by mutableStateOf<StudyPlan?>(null); private set
+    /** Баллы БРС и посещаемость из ЛК; null — ещё не загружались. */
+    var progress by mutableStateOf<Progress?>(null); private set
+    var gradeNotifications by mutableStateOf(false); private set
     var tab by mutableStateOf(RootTab.SCHEDULE)
     /** Счётчик минут: экраны перерисовывают «идёт сейчас» и «ещё N мин». */
     var minute by mutableStateOf(Clock.now); private set
@@ -150,6 +156,8 @@ class AppState(application: Application) : AndroidViewModel(application) {
         group = d.string(Keys.GROUP)
         program = d.string(Keys.PROGRAM)
         plan = d.plan()
+        progress = d.progress()
+        gradeNotifications = d.bool(Keys.GRADE_NOTIFICATIONS)
         photo = d.string(Keys.PHOTO)?.let { base64 ->
             runCatching {
                 val bytes = Base64.decode(base64, Base64.DEFAULT)
@@ -207,6 +215,9 @@ class AppState(application: Application) : AndroidViewModel(application) {
             // выглядеть как обычное обновление.
             if (sync.skipped == SkipReason.TOO_SOON) delay(500)
             pendingChanges = sync.changes
+            // Системное уведомление — и из открытого приложения: его могли свернуть,
+            // пока шло обновление. На экране баннер уже виден — тогда без звука.
+            Notifications.showChanges(context, sync.changes, silent = AppVisibility.foreground)
             error = sync.sideEffectError
             if (sync.skipped == SkipReason.BACKOFF && trigger == SyncTrigger.MANUAL) {
                 error = LkError.ServerBusy(503, null).message
@@ -241,6 +252,12 @@ class AppState(application: Application) : AndroidViewModel(application) {
         d.setInt(Keys.REMINDER_MINUTES, minutes)
         reminderMinutes = minutes
         resync()
+    }
+
+    /** Уведомления о новых баллах. Разрешение на уведомления экран спрашивает сам при включении. */
+    fun changeGradeNotifications(enabled: Boolean) {
+        d.setBool(Keys.GRADE_NOTIFICATIONS, enabled)
+        gradeNotifications = enabled
     }
 
     fun changeCalendarExport(enabled: Boolean) {

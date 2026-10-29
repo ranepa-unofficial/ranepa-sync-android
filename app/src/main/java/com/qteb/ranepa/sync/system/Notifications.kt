@@ -33,6 +33,7 @@ object Notifications {
     const val CHANNEL_CHANGES = "changes"
     const val CHANNEL_SESSION = "session"
     const val CHANNEL_LIVE = "live"
+    const val CHANNEL_GRADES = "grades"
 
     /** Начало пары в намерении: нажатие открывает её карточку. */
     const val EXTRA_LESSON = "lesson"
@@ -49,6 +50,7 @@ object Notifications {
     private const val ID_SESSION = 2
     private const val ID_KEEP_ALIVE = 3
     private const val ID_TEST = 4
+    private const val ID_GRADES = 5
 
     /** Коды будильников: напоминания о парах, о сессии, «открой приложение». */
     private const val CODE_LESSONS = 1000
@@ -82,6 +84,9 @@ object Notifications {
             },
             NotificationChannel(CHANNEL_SESSION, "Вход в ЛК", NotificationManager.IMPORTANCE_DEFAULT).apply {
                 description = "Когда сессия личного кабинета истекает"
+            },
+            NotificationChannel(CHANNEL_GRADES, "Новые баллы", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = "Изменились баллы БРС по предметам"
             },
         ))
     }
@@ -208,14 +213,34 @@ object Notifications {
     }
 
     /** Одно уведомление на все изменения: первые строки и «и ещё N». */
-    fun showChanges(context: Context, changes: List<String>) {
-        if (changes.isEmpty()) return
-        val shown = 3
+    /** Первые три строки и «и ещё N». */
+    fun summary(changes: List<String>, shown: Int = 3): String {
         val lines = changes.take(shown).toMutableList()
         if (changes.size > shown) lines += "и ещё ${changes.size - shown}"
+        return lines.joinToString("\n")
+    }
+
+    /**
+     * Одно уведомление на все изменения. Приходит при любом обновлении —
+     * фоновом, при открытии и по «потянуть вниз»: приложение могли свернуть,
+     * пока шло обновление. [silent] — приложение на экране и уже показало
+     * изменения баннером: уведомление только ложится в шторку, без звука
+     * и всплывающего окна.
+     */
+    fun showChanges(context: Context, changes: List<String>, silent: Boolean = false) {
+        if (changes.isEmpty()) return
         val title = if (changes.size == 1) "Изменение в расписании" else "Изменения в расписании"
-        post(context, null, ID_CHANGES, builder(context, CHANNEL_CHANGES, title, lines.joinToString("\n"))
+        post(context, null, ID_CHANGES, builder(context, CHANNEL_CHANGES, title, summary(changes))
+            .setSilent(silent)
             .setContentIntent(openLesson(context, null, ID_CHANGES))
+            .build())
+    }
+
+    /** «Информатика: 16 → 24 балла» — одно уведомление на все предметы, новое заменяет старое. */
+    fun showGrades(context: Context, changes: List<String>) {
+        if (changes.isEmpty()) return
+        post(context, null, ID_GRADES, builder(context, CHANNEL_GRADES, "Новые баллы", summary(changes))
+            .setContentIntent(openLesson(context, null, ID_GRADES))
             .build())
     }
 
