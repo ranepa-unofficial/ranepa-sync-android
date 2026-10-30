@@ -23,8 +23,8 @@ android {
         applicationId = "com.qteb.ranepa.sync"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.0.1"
+        versionCode = 5
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Анонимная статистика: пустой App ID — SDK не запускается.
         buildConfigField("String", "TELEMETRYDECK_APP_ID", "\"${providers.gradleProperty("telemetrydeck.appId").getOrElse("")}\"")
@@ -92,6 +92,8 @@ dependencies {
     implementation(libs.serialization.json)
     implementation(libs.osmdroid)
     implementation(libs.telemetrydeck)
+    implementation(libs.play.app.update)
+    implementation(libs.rustore.app.update)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 

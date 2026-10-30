@@ -7,12 +7,17 @@ import com.qteb.ranepa.sync.core.Store
 import com.qteb.ranepa.sync.core.addingDays
 import com.qteb.ranepa.sync.core.dateOnly
 import com.qteb.ranepa.sync.core.isoWeekday
+import com.qteb.ranepa.sync.core.day
 import com.qteb.ranepa.sync.core.monday
+import com.qteb.ranepa.sync.core.month
 import com.qteb.ranepa.sync.core.moscowStamp
 import com.qteb.ranepa.sync.core.sameDay
 import com.qteb.ranepa.sync.lk.FetchResult
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonArrayBuilder
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -165,7 +170,49 @@ object Demo {
                 }
             }
         }
-        return FetchResult(days = days, group = GROUP, program = PROGRAM, fullName = NAME, plan = plan(monday))
+        return FetchResult(days = days, group = GROUP, program = PROGRAM, fullName = NAME, plan = plan(monday),
+            progress = progress(now, revision))
+    }
+
+    /**
+     * Успеваемость в формате ЛК: метки дисциплин с приписками, как на сайте.
+     * Каждое «потянуть вниз» добавляет баллы по математике — видно
+     * уведомление о новых баллах.
+     */
+    fun progress(now: Instant, revision: Int = 0): JsonObject {
+        val points = listOf(34, 41, 28, 55, 22 + 4 * revision, 37, 46, 31)
+        // Семестр с сентября по январь; прошедшие месяцы посещены почти все.
+        val names = listOf("Сентябрь", "Октябрь", "Ноябрь", "Декабрь", "Январь")
+        val plans = listOf(63, 77, 63, 50, 5)
+        val current = mapOf(9 to 0, 10 to 1, 11 to 2, 12 to 3, 1 to 4)[now.month] ?: 4
+        return buildJsonObject {
+            putJsonObject("brs") {
+                putJsonArray("labels") {
+                    subjects.forEachIndexed { i, (name, _, _) ->
+                        add(JsonPrimitive(if (i == 2) "${name}_ОАФ_1 курс_B1-B2 [1 семестр] [] []" else "$name [1 семестр] [] []"))
+                    }
+                }
+                putJsonArray("data") { points.forEach { add(JsonPrimitive(minOf(it, 100))) } }
+            }
+            putJsonObject("visits") {
+                putJsonArray("items") {
+                    names.forEachIndexed { i, name ->
+                        val fact = when {
+                            i < current -> plans[i] * 9 / 10
+                            i == current -> plans[i] * 2 / 3 * now.day / 30
+                            else -> 0
+                        }
+                        addJsonObject {
+                            put("monthName", name)
+                            put("maxValue", plans[i])
+                            put("currentValue", fact)
+                        }
+                    }
+                }
+            }
+            put("avg_brs", JsonNull)
+            put("rating", JsonNull)
+        }
     }
 
     /** План обучения: формы контроля по предметам и сессия — те две недели,

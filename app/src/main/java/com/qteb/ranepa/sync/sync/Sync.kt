@@ -17,6 +17,7 @@ import com.qteb.ranepa.sync.core.isoWeekday
 import com.qteb.ranepa.sync.core.localDayStart
 import com.qteb.ranepa.sync.core.monday
 import com.qteb.ranepa.sync.core.parseLessons
+import com.qteb.ranepa.sync.core.saveProgress
 import com.qteb.ranepa.sync.core.sameDay
 import com.qteb.ranepa.sync.core.str
 import com.qteb.ranepa.sync.lk.FetchResult
@@ -186,6 +187,8 @@ object Sync {
             LkWebView.refresh(
                 context, monday, weeks, stopAfterEmpty = if (semester) EMPTY_WEEKS_TO_STOP else null,
                 withProfile = full, withPhoto = full && photoStale(d, now), withPlan = semester,
+                // Баллы — раз в день и по «потянуть вниз».
+                withProgress = full || trigger == SyncTrigger.MANUAL,
             )
         } catch (e: LkError.ServerBusy) {
             startBackoff(d, e.retryAfter)
@@ -256,6 +259,7 @@ object Sync {
         d.setTime(Keys.FETCHED_AT, Clock.now)
         result.sessionUntil?.let { d.setTime(Keys.SESSION_UNTIL, it) }
         result.plan?.let { d.setString(Keys.PLAN, it) }
+        val gradeChanges = d.saveProgress(result.progress, Clock.now)
         if (full) d.setTime(Keys.LAST_FULL_AT, Clock.now)
         if (replaceAll) {
             d.setTime(Keys.RANGE_START, monday)
@@ -264,6 +268,7 @@ object Sync {
         d.setBool(Keys.LOGGED_IN, true)
         d.remove(Keys.SESSION_EXPIRED_NOTIFIED, Keys.SESSION_EXPIRED)
 
+        if (d.bool(Keys.GRADE_NOTIFICATIONS)) Notifications.showGrades(context, gradeChanges)
         return SyncResult(
             changes = if (hadCache) describeChanges(before, after, Clock.now) else emptyList(),
             sideEffectError = applySideEffects(context, after),

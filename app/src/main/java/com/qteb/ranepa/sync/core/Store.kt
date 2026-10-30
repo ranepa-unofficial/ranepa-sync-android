@@ -46,13 +46,31 @@ object Keys {
     const val PLACES = "places"
     /** Последний день, за который отправлены настройки, — «2026-10-26». */
     const val ANALYTICS_DAY = "analyticsDay"
+    /** Текущая успеваемость (JSON Progress) и баллы по дням для «за неделю». */
+    const val PROGRESS = "progress"
+    const val PROGRESS_HISTORY = "progressHistory"
+    /** Уведомлять о новых баллах БРС. */
+    const val GRADE_NOTIFICATIONS = "gradeNotifications"
+    /** Манифест обновлений (update.json), когда его загрузили и какую новую
+     * версию уже видели в аккаунте. При выходе не удаляются. */
+    const val UPDATE_MANIFEST = "updateManifest"
+    const val UPDATE_CHECKED_AT = "updateCheckedAt"
+    const val UPDATE_SEEN = "updateSeen"
+    /** О какой версии и когда последний раз показывали шторку «Вышла версия». */
+    const val UPDATE_SHEET_VERSION = "updateSheetVersion"
+    const val UPDATE_SHEET_SHOWN_AT = "updateSheetShownAt"
+    /** Новая версия из последней проверки: точка на аватаре до следующей проверки. */
+    const val UPDATE_OFFER = "updateOffer"
+    /** Только в отладке: канал установки и манифест вместо настоящих. */
+    const val UPDATE_DEBUG_CHANNEL = "updateDebugChannel"
+    const val UPDATE_DEBUG_MANIFEST = "updateDebugManifest"
 
     /** Всё, что относится к сессии и удаляется при выходе. */
     val session = listOf(
         LOGGED_IN, DAYS, GROUP, FETCHED_AT, RANGE_START, SESSION_EXPIRED_NOTIFIED, SESSION_EXPIRED,
         LAST_BACKGROUND_RUN, LAST_BACKGROUND_RESULT, FULL_NAME, PROGRAM, PHOTO,
         PHOTO_FETCHED_AT, LAST_FULL_AT, LAST_SEMESTER_AT, LAST_ATTEMPT_AT, BACKOFF_UNTIL, BACKOFF_FAILURES,
-        DEMO, DEMO_REVISION, DEMO_SHIFT, DEMO_FAST_FROM, SESSION_UNTIL, PLAN,
+        DEMO, DEMO_REVISION, DEMO_SHIFT, DEMO_FAST_FROM, SESSION_UNTIL, PLAN, PROGRESS, PROGRESS_HISTORY,
     )
 }
 

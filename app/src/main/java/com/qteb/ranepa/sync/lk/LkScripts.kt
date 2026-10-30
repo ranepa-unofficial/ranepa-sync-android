@@ -70,7 +70,7 @@ internal object LkScripts {
      */
     fun fetch(id: String, args: String) = """
 (async function () {
-  const { urls, headers, stopAfterEmpty, minWeeks, groupsUrl, profileUrl, photoUrl, withProfile, withPhoto, withPlan } = $args;
+  const { urls, headers, stopAfterEmpty, minWeeks, groupsUrl, profileUrl, photoUrl, withProfile, withPhoto, withPlan, withProgress } = $args;
   const auth = { authorization: 'Bearer ' + localStorage.getItem('access_token') };
   async function get(url) {
     const r = await fetch(url, { headers: Object.assign({}, headers, auth) });
@@ -93,11 +93,21 @@ internal object LkScripts {
     }
     // Профиль — необязательная часть: ошибка не должна ломать расписание.
     const out = { days: days };
-    if (withProfile) try {
+    if (withProfile || withProgress) try {
       const sg = ((await get(groupsUrl)).items || [])[0] || {};
-      out.group = sg.academic_group;
-      out.program = sg.edu_program_title;
+      if (withProfile) {
+        out.group = sg.academic_group;
+        out.program = sg.edu_program_title;
+      }
       out.uid = sg.uid_student;
+      out.org = sg.uid_org;
+    } catch (e) {}
+    // Текущая успеваемость: баллы БРС, посещаемость, средний балл — то, что
+    // ЛК показывает в разделе «Успеваемость». Ошибка не ломает расписание.
+    if (withProgress && out.uid && out.org) try {
+      const base = groupsUrl.replace('manual/student-groups', '');
+      const r = await get(base + 'dashboard/progress?uidStudent=' + out.uid + '&uidOrg=' + out.org + '&code=progress');
+      if (r.data && r.data.content) out.progress = r.data.content;
     } catch (e) {}
     // План обучения: все семестры, формы контроля, даты сессий.
     if (withPlan && out.uid) try {
@@ -124,6 +134,7 @@ internal object LkScripts {
       };
     } catch (e) {}
     delete out.uid;
+    delete out.org;
     if (withProfile) try {
       const p = (await get(profileUrl)).item || {};
       out.name = [p.last_name, p.first_name, p.middle_name].filter(Boolean).join(' ');

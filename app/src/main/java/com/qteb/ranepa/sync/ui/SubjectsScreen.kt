@@ -54,9 +54,20 @@ import com.qteb.ranepa.sync.core.year
 import java.time.Instant
 
 /** Строка списка предметов: предмет из плана и/или расписания. */
-private data class SubjectEntry(val name: String, val form: String?, val subject: Subject)
+private data class SubjectEntry(val name: String, val form: String?, val subject: Subject, val points: Int? = null)
 
 private fun entries(state: AppState, now: Instant): List<SubjectEntry> {
+    val base = baseEntries(state, now)
+    val progress = state.progress ?: return base
+    val list = base.map { it.copy(points = progress.pointsFor(it.name)) }.toMutableList()
+    // Предметы с баллами, которых нет ни в плане, ни в расписании.
+    for (s in progress.subjects) {
+        if (list.none { it.name.lowercase() == s.name.lowercase() }) list += SubjectEntry(s.name, null, Subject(s.name, emptyList(), now), s.points)
+    }
+    return list
+}
+
+private fun baseEntries(state: AppState, now: Instant): List<SubjectEntry> {
     val fromSchedule = Subject.all(state.lessons, now)
     val plan = state.plan
     val semester = plan?.currentSemester(now) ?: return fromSchedule.map { SubjectEntry(it.name, null, it) }
@@ -86,6 +97,17 @@ fun SubjectsScreen(state: AppState, onSearch: () -> Unit, onAccount: () -> Unit)
             return
         }
         LazyColumn(Modifier.fillMaxSize(), contentPadding = listBottom) {
+            state.progress?.takeIf { it.showsCard() }?.let { progress ->
+                item(key = "grades") {
+                    val context = LocalContext.current
+                    Box(Modifier.padding(top = 12.dp)) {
+                        GradesCard(progress) {
+                            com.qteb.ranepa.sync.system.Analytics.screen(context, "grades")
+                            routes.grades()
+                        }
+                    }
+                }
+            }
             section("Предметы семестра · ${list.size}", list, key = { it.name }) { e -> SubjectRow(e) { routes.subject(e.name) } }
             if (plan != null && plan.items.isNotEmpty()) {
                 item { Box(Modifier.height(16.dp)) }
@@ -115,6 +137,7 @@ private fun SubjectRow(entry: SubjectEntry, onClick: () -> Unit) {
             Text(entry.name, style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text(subtitle, style = MaterialTheme.typography.bodyMedium, maxLines = 1,
                 color = if (subject.lessons.isEmpty()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant)
+            entry.points?.let { PointsLine(it) }
         }
         entry.form?.let { FormBadge(it) }
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -173,6 +196,7 @@ fun SubjectScreen(state: AppState, name: String, onBack: () -> Unit) {
     ) { padding ->
         LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 24.dp)) {
             item { ScreenTitle(name, planLine, if (subject.lessons.isEmpty()) "Пар в расписании нет" else subject.upcomingSummary) }
+            subjectGradesSection(name, state.progress, weekDelta(context, name))
             subject.next?.let { next ->
                 section("Следующая", listOf(next)) { LessonListRow(it, showSubject = false) { open(it) } }
             }

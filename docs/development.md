@@ -64,6 +64,8 @@ Live Update и виджеты.
 [GitHub Releases](https://github.com/ranepa-unofficial/ranepa-sync-android/releases).
 Перед тегом подними `versionCode` (и `versionName`, если версия меняется для
 пользователей) в [`app/build.gradle.kts`](../app/build.gradle.kts).
+Весь порядок выпуска, включая магазины и манифест обновлений `update.json`, —
+в [release.md](release.md).
 
 ```bash
 git tag v1.0.1 && git push origin v1.0.1
