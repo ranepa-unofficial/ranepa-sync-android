@@ -36,6 +36,8 @@ import com.qteb.ranepa.sync.system.AppVisibility
 import com.qteb.ranepa.sync.system.CalendarExport
 import com.qteb.ranepa.sync.system.LiveUpdates
 import com.qteb.ranepa.sync.system.Notifications
+import com.qteb.ranepa.sync.system.UpdateRules
+import com.qteb.ranepa.sync.system.Updates
 import com.qteb.ranepa.sync.ui.From
 import com.qteb.ranepa.sync.widget.Widgets
 import kotlinx.coroutines.delay
@@ -108,6 +110,15 @@ class AppState(application: Application) : AndroidViewModel(application) {
     var progress by mutableStateOf<Progress?>(null); private set
     var gradeNotifications by mutableStateOf(false); private set
     var tab by mutableStateOf(RootTab.SCHEDULE)
+    /** Эта версия больше не работает — экран обновления поверх всего. */
+    var updateRequired by mutableStateOf(false); private set
+    /** Новая версия: строка в аккаунте; [updateUnseen] — точка на аватаре. */
+    var updateOffer by mutableStateOf<Updates.Offer?>(null); private set
+    var updateUnseen by mutableStateOf(false); private set
+    /** Шторка «Вышла версия»: показывается один раз, после «Позже» — через 3 дня. */
+    var updateSheet by mutableStateOf<Updates.Offer?>(null); private set
+    val updateChannel: UpdateRules.Channel get() = Updates.channel(context)
+    val debugUpdateManifest: String? get() = d.string(Keys.UPDATE_DEBUG_MANIFEST)
     /** Счётчик минут: экраны перерисовывают «идёт сейчас» и «ещё N мин». */
     var minute by mutableStateOf(Clock.now); private set
 
@@ -158,6 +169,9 @@ class AppState(application: Application) : AndroidViewModel(application) {
         plan = d.plan()
         progress = d.progress()
         gradeNotifications = d.bool(Keys.GRADE_NOTIFICATIONS)
+        updateRequired = Updates.requiredFromCache(context)
+        updateOffer = Updates.cachedOffer(context)
+        updateUnseen = updateOffer?.let { it.key != d.string(Keys.UPDATE_SEEN) } ?: false
         photo = d.string(Keys.PHOTO)?.let { base64 ->
             runCatching {
                 val bytes = Base64.decode(base64, Base64.DEFAULT)
@@ -244,6 +258,41 @@ class AppState(application: Application) : AndroidViewModel(application) {
         Notifications.removeStale(context)
         showLiveUpdate()
         refresh(SyncTrigger.OPEN)
+    }
+
+    /** Новая версия: при выходе на экран, не чаще раза в 3 часа. */
+    fun checkUpdates() {
+        if (Clock.screenshotMode) return
+        viewModelScope.launch {
+            val result = Updates.check(context) ?: return@launch
+            loadCache()
+            val offer = result.offer ?: return@launch
+            if (!result.required && UpdateRules.offerSheet(offer.key, d.string(Keys.UPDATE_SHEET_VERSION),
+                    d.time(Keys.UPDATE_SHEET_SHOWN_AT), Clock.now)) updateSheet = offer
+        }
+    }
+
+    /** Шторку закрыли — «Позже», «Обновить» или жестом: о той же версии снова через 3 дня. */
+    fun dismissUpdateSheet() {
+        updateSheet?.let {
+            d.setString(Keys.UPDATE_SHEET_VERSION, it.key)
+            d.setTime(Keys.UPDATE_SHEET_SHOWN_AT, Clock.now)
+        }
+        updateSheet = null
+    }
+
+    /** Отладка: настоящие канал и манифест вместо подменённых. */
+    fun resetDebugUpdates() {
+        d.remove(Keys.UPDATE_DEBUG_CHANNEL, Keys.UPDATE_DEBUG_MANIFEST, Keys.UPDATE_OFFER, Keys.UPDATE_CHECKED_AT)
+        loadCache()
+        checkUpdates()
+    }
+
+    /** Строку «Доступна версия» увидели в аккаунте — точка на аватаре гаснет. */
+    fun markUpdateSeen() {
+        val offer = updateOffer ?: return
+        d.setString(Keys.UPDATE_SEEN, offer.key)
+        updateUnseen = false
     }
 
     private fun resync() = viewModelScope.launch { error = Sync.applySideEffects(context, lessons) }

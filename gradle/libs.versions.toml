@@ -14,6 +14,8 @@ coroutines = "1.11.0"
 serialization = "1.12.0"
 osmdroid = "6.1.20"
 telemetrydeck = "7.2.0"
+playAppUpdate = "2.1.0"
+rustoreAppUpdate = "10.5.2"
 junit = "4.13.2"
 robolectric = "4.17"
 roborazzi = "1.77.0"
@@ -43,6 +45,8 @@ coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", ve
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 osmdroid = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
 telemetrydeck = { module = "com.telemetrydeck:kotlin-sdk", version.ref = "telemetrydeck" }
+play-app-update = { module = "com.google.android.play:app-update-ktx", version.ref = "playAppUpdate" }
+rustore-app-update = { module = "ru.rustore.sdk:appupdate", version.ref = "rustoreAppUpdate" }
 junit = { module = "junit:junit", version.ref = "junit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = "roborazzi" }

@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.qteb.ranepa.sync.core.Clock
+import com.qteb.ranepa.sync.core.Keys
 import com.qteb.ranepa.sync.core.Store
 import com.qteb.ranepa.sync.sync.Background
 import com.qteb.ranepa.sync.system.Analytics
@@ -67,6 +68,16 @@ class MainActivity : ComponentActivity() {
 
     /** Нажали на напоминание, Live Update или виджет: открыть пару. */
     private fun handle(intent: Intent?) {
+        // Отладка: adb shell am start -n com.qteb.ranepa.sync.debug/com.qteb.ranepa.sync.MainActivity
+        //   --es updateChannel rustore --es updateManifest '{...}'  (пустая строка — сбросить)
+        if (BuildConfig.DEBUG && intent != null) {
+            val d = Store(this)
+            for ((extra, key) in listOf("updateChannel" to Keys.UPDATE_DEBUG_CHANNEL, "updateManifest" to Keys.UPDATE_DEBUG_MANIFEST)) {
+                val value = intent.getStringExtra(extra) ?: continue
+                d.setString(key, value.ifEmpty { null })
+                intent.removeExtra(extra)
+            }
+        }
         val seconds = intent?.getLongExtra(Notifications.EXTRA_LESSON, 0L) ?: 0L
         if (seconds > 0) {
             state.pendingLesson = Instant.ofEpochSecond(seconds).plus(Clock.shift)

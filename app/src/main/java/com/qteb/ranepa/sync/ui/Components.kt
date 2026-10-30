@@ -151,7 +151,14 @@ fun AccountButton(state: AppState, onClick: () -> Unit) {
         Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onClick)
             .semantics { contentDescription = "Аккаунт и настройки" },
         contentAlignment = Alignment.Center,
-    ) { Avatar(state, 36.dp) }
+    ) {
+        // Красная точка — вышла новая версия, а строку в аккаунте ещё не видели.
+        if (state.updateUnseen) {
+            androidx.compose.material3.BadgedBox(badge = { androidx.compose.material3.Badge() }) { Avatar(state, 36.dp) }
+        } else {
+            Avatar(state, 36.dp)
+        }
+    }
 }
 
 /** Форма групп в списках, как в Material 3 Expressive: крайние строки скруглены сильнее. */

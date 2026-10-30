@@ -2,7 +2,8 @@
   "github": {
     "latest": "1.0.1",
     "latestCode": 4,
-    "url": "https://github.com/ranepa-unofficial/ranepa-sync-android/releases/latest"
+    "notes": "",
+    "url": "https://github.com/ranepa-unofficial/ranepa-sync-android/releases/latest/download/ranepa.apk"
   },
   "minimum": {
     "version": "1.0.0",

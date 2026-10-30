@@ -3,6 +3,7 @@ package com.qteb.ranepa.sync.ui
 import android.Manifest
 import android.net.Uri
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -47,12 +48,14 @@ import com.qteb.ranepa.sync.core.Clock
 import com.qteb.ranepa.sync.core.Store
 import com.qteb.ranepa.sync.sync.SyncTrigger
 import com.qteb.ranepa.sync.system.Analytics
+import com.qteb.ranepa.sync.system.Updates
 
 /** Переходы, доступные любому экрану и карточке пары. */
 class Routes(private val nav: NavHostController?, private val state: AppState?) {
     fun subject(name: String) = go("subject/${Uri.encode(name)}")
     fun lecturer(name: String) = go("lecturer/${Uri.encode(name)}")
     fun plan() = go("plan")
+    fun grades() = go("grades")
 
     private fun go(route: String) {
         // Из карточки пары: лист закрывается, экран открывается поверх вкладки.
@@ -63,10 +66,34 @@ class Routes(private val nav: NavHostController?, private val state: AppState?) 
 
 val LocalRoutes = staticCompositionLocalOf { Routes(null, null) }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(state: AppState) {
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { if (state.loggedIn) state.resumed() else state.checkNotifications() }
+    val activity = LocalActivity.current
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (state.loggedIn) state.resumed() else state.checkNotifications()
+        state.checkUpdates()
+    }
+    if (state.updateRequired) {
+        RequiredUpdateScreen(state.updateChannel, Updates.current,
+            onUpdate = { activity?.let { Updates.start(it, state.updateChannel, required = true) } },
+            onDebugReset = if (state.debugUpdateManifest != null) state::resetDebugUpdates else null)
+        return
+    }
     if (state.loggedIn) MainFlow(state) else AuthFlow(state)
+
+    state.updateSheet?.let { offer ->
+        ModalBottomSheet(
+            onDismissRequest = state::dismissUpdateSheet,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ) {
+            UpdateSheetContent(offer, Updates.current, onUpdate = {
+                state.dismissUpdateSheet()
+                activity?.let { Updates.start(it, offer.channel, required = false) }
+            }, onLater = state::dismissUpdateSheet)
+        }
+    }
 
     state.loginFailure?.let { failure ->
         AlertDialog(
@@ -124,6 +151,7 @@ private fun MainFlow(state: AppState) {
                     composable("subject/{name}") { SubjectScreen(state, it.arguments?.getString("name").orEmpty()) { nav.popBackStack() } }
                     composable("lecturer/{name}") { LecturerScreen(state, it.arguments?.getString("name").orEmpty()) { nav.popBackStack() } }
                     composable("plan") { PlanScreen(state) { nav.popBackStack() } }
+                    composable("grades") { GradesScreen(state) { nav.popBackStack() } }
                     composable("search") { SearchScreen(state) { nav.popBackStack() } }
                     composable("account") {
                         AccountScreen(state, onBack = { nav.popBackStack() }, onAbout = {

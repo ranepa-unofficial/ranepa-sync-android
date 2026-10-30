@@ -79,6 +79,9 @@ import com.qteb.ranepa.sync.system.MapApp
 import com.qteb.ranepa.sync.system.Notifications
 import com.qteb.ranepa.sync.system.Analytics
 import com.qteb.ranepa.sync.system.SupportLink
+import com.qteb.ranepa.sync.system.UpdateRules
+import com.qteb.ranepa.sync.system.Updates
+import com.qteb.ranepa.sync.core.Keys
 import kotlinx.coroutines.launch
 
 private val reminderOptions = listOf(0, 5, 10, 15, 30, 60)
@@ -165,6 +168,15 @@ fun AccountScreen(state: AppState, onBack: () -> Unit, onAbout: () -> Unit) {
                             modifier = Modifier.copyable(it).padding(top = 2.dp))
                     }
                 }
+            }
+
+            state.updateOffer?.let { offer ->
+                item(key = "update-seen") { androidx.compose.runtime.LaunchedEffect(offer.key) { state.markUpdateSeen() } }
+                section(null, listOf(offer)) {
+                    val activity = androidx.activity.compose.LocalActivity.current
+                    UpdateRow(it) { activity?.let { a -> Updates.start(a, it.channel, required = false) } }
+                }
+                item { Box(Modifier.height(16.dp)) }
             }
 
             val rows = buildList<@Composable () -> Unit> {
@@ -306,6 +318,24 @@ private fun androidx.compose.foundation.lazy.LazyListScope.debugSection(state: A
             Background.debugShiftNextLesson(context)
             state.loadCache()
         },
+        Action("Канал обновлений: ${debugChannel(state)}", "Как будто установлено из другого места; проверка без паузы") { context ->
+            val d = Store(context)
+            val channels = listOf<UpdateRules.Channel?>(null) + UpdateRules.Channel.entries
+            val next = channels[(channels.indexOf(UpdateRules.Channel.parse(d.string(Keys.UPDATE_DEBUG_CHANNEL))) + 1) % channels.size]
+            d.setString(Keys.UPDATE_DEBUG_CHANNEL, next?.name)
+            state.checkUpdates()
+        },
+        Action("Тестовый манифест: ${debugManifestTitle(state)}", "update.json с новой или обязательной версией") { context ->
+            val d = Store(context)
+            val next = when (d.string(Keys.UPDATE_DEBUG_MANIFEST)) {
+                null -> DEBUG_MANIFEST_NEW
+                DEBUG_MANIFEST_NEW -> DEBUG_MANIFEST_REQUIRED
+                else -> null
+            }
+            d.setString(Keys.UPDATE_DEBUG_MANIFEST, next)
+            d.remove(Keys.UPDATE_SHEET_VERSION, Keys.UPDATE_SHEET_SHOWN_AT, Keys.UPDATE_SEEN)
+            state.checkUpdates()
+        },
         Action("Часы 13.10, 11:05", "Как на скриншотах; ещё раз — настоящие часы") { context ->
             val d = Store(context)
             val value = if (d.string(RanepaApplication.DEMO_AT_KEY) == null) "2026-10-13T11:05" else null
@@ -321,6 +351,19 @@ private fun androidx.compose.foundation.lazy.LazyListScope.debugSection(state: A
             Text(a.subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
+}
+
+private const val DEBUG_MANIFEST_NEW = """{"github": {"latest": "9.9.0", "latestCode": 999, "notes": "Тестовая версия из отладки.",
+    "url": "${Updates.LATEST_APK}"}, "minimum": {"version": "1.0.0", "code": 0}}"""
+private const val DEBUG_MANIFEST_REQUIRED = """{"github": {"latest": "9.9.0", "latestCode": 999, "url": "${Updates.LATEST_APK}"},
+    "minimum": {"version": "9.9.0", "code": 999}}"""
+
+private fun debugChannel(state: AppState) = state.updateChannel.storeName
+
+private fun debugManifestTitle(state: AppState) = when (state.debugUpdateManifest) {
+    null -> "настоящий"
+    DEBUG_MANIFEST_NEW -> "новая версия"
+    else -> "обязательная"
 }
 
 object Links {

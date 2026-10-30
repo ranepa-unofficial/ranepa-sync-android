@@ -59,6 +59,11 @@ object Keys {
     /** О какой версии и когда последний раз показывали шторку «Вышла версия». */
     const val UPDATE_SHEET_VERSION = "updateSheetVersion"
     const val UPDATE_SHEET_SHOWN_AT = "updateSheetShownAt"
+    /** Новая версия из последней проверки: точка на аватаре до следующей проверки. */
+    const val UPDATE_OFFER = "updateOffer"
+    /** Только в отладке: канал установки и манифест вместо настоящих. */
+    const val UPDATE_DEBUG_CHANNEL = "updateDebugChannel"
+    const val UPDATE_DEBUG_MANIFEST = "updateDebugManifest"
 
     /** Всё, что относится к сессии и удаляется при выходе. */
     val session = listOf(

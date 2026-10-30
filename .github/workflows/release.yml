@@ -1,6 +1,8 @@
 name: Release
 
 # Тег v1.0.0 → подписанные AAB (для Google Play и RuStore) и APK в GitHub Releases.
+# ranepa.apk — то же APK под постоянным именем: на него ведёт «Обновить» в приложении
+# (releases/latest/download/ranepa.apk). Дальше — update.json, см. docs/release.md.
 on:
   push:
     tags: ["v*"]
@@ -32,5 +34,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp app/build/outputs/apk/release/app-release.apk "ranepa-${GITHUB_REF_NAME}.apk"
+          cp app/build/outputs/apk/release/app-release.apk ranepa.apk
           cp app/build/outputs/bundle/release/app-release.aab "ranepa-${GITHUB_REF_NAME}.aab"
-          gh release create "$GITHUB_REF_NAME" "ranepa-${GITHUB_REF_NAME}.apk" "ranepa-${GITHUB_REF_NAME}.aab" --generate-notes
+          gh release create "$GITHUB_REF_NAME" "ranepa-${GITHUB_REF_NAME}.apk" ranepa.apk "ranepa-${GITHUB_REF_NAME}.aab" --generate-notes
