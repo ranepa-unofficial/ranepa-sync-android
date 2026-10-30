@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
     /** Нажали на напоминание, Live Update или виджет: открыть пару. */
     private fun handle(intent: Intent?) {
         // Отладка: adb shell am start -n com.qteb.ranepa.sync.debug/com.qteb.ranepa.sync.MainActivity
-        //   --es updateChannel rustore --es updateManifest '{...}'  (пустая строка — сбросить)
+        //   --es updateChannel rustore --es updateManifest '{...}'. Сброс — в «Отладке».
         if (BuildConfig.DEBUG && intent != null) {
             val d = Store(this)
             for ((extra, key) in listOf("updateChannel" to Keys.UPDATE_DEBUG_CHANNEL, "updateManifest" to Keys.UPDATE_DEBUG_MANIFEST)) {
