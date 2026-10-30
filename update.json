@@ -1,8 +1,8 @@
 {
   "github": {
-    "latest": "1.0.1",
-    "latestCode": 4,
-    "notes": "",
+    "latest": "1.1.0",
+    "latestCode": 5,
+    "notes": "Баллы БРС и посещаемость на вкладке «Предметы», уведомление о новых баллах.",
     "url": "https://github.com/ranepa-unofficial/ranepa-sync-android/releases/latest/download/ranepa.apk"
   },
   "minimum": {
