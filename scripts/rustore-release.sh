@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Новая версия в RuStore через RuStore API: черновик → APK → модерация.
-# После модерации версия публикуется сразу (publishType INSTANT).
+# Когда публиковать после модерации — настройка по умолчанию в консоли RuStore.
 #
 #   RUSTORE_KEY_ID=… RUSTORE_PRIVATE_KEY=… scripts/rustore-release.sh app-release.apk "Что нового"
 #
@@ -51,7 +51,7 @@ token=$(jq -r .body.jwe <<<"$response")
 
 response=$(curl -sS -X POST "$API/v1/application/$PACKAGE/version" \
     -H "Public-Token: $token" -H 'Content-Type: application/json' \
-    -d "$(jq -n --arg w "$WHATS_NEW" '{whatsNew: $w, publishType: "INSTANT"}')")
+    -d "$(jq -n --arg w "$WHATS_NEW" '{whatsNew: $w}')")
 check "$response" "Черновик"
 version=$(jq -r .body <<<"$response")
 [[ $version =~ ^[0-9]+$ ]] || { version=; fail "Черновик: нет номера версии в ответе: $response"; }
