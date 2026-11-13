@@ -8,6 +8,12 @@
 > Приложение не связано с РАНХиГС и не поддерживается академией.
 
 <p align="center">
+  <a href="https://www.rustore.ru/catalog/app/com.qteb.ranepa.sync"><img src="docs/badges/rustore-badge-ru.svg" height="48" alt="Доступно в RuStore"></a>
+  &nbsp;
+  <a href="https://github.com/ranepa-unofficial/ranepa-sync-android/releases/latest/download/ranepa.apk"><img src="docs/badges/apk-badge-ru.svg" height="48" alt="Скачать APK с GitHub"></a>
+</p>
+
+<p align="center">
   <img src="docs/images/schedule.jpg" width="24%" alt="Расписание">
   <img src="docs/images/lesson.jpg" width="24%" alt="Карточка пары">
   <img src="docs/images/session.jpg" width="24%" alt="Сессия">
@@ -16,8 +22,12 @@
 
 ## Установка
 
-Скачай APK из [последнего релиза](https://github.com/ranepa-unofficial/ranepa-sync-android/releases/latest)
-и открой его на телефоне. Нужен Android 8.0 или новее.
+Удобнее всего — из [RuStore](https://www.rustore.ru/catalog/app/com.qteb.ranepa.sync):
+обновления будут приходить сами. Без RuStore можно
+[скачать APK](https://github.com/ranepa-unofficial/ranepa-sync-android/releases/latest/download/ranepa.apk)
+последней версии и открыть его на телефоне; прошлые версии — в
+[релизах](https://github.com/ranepa-unofficial/ranepa-sync-android/releases).
+Нужен Android 8.0 или новее.
 
 ## Что умеет
 
@@ -60,8 +70,8 @@
 ## Состояние
 
 Версия 1.0 — первая для Android (Kotlin, Jetpack Compose, Material 3).
-Релизы с готовым APK — в [GitHub Releases](https://github.com/ranepa-unofficial/ranepa-sync-android/releases),
-закрытое тестирование — в RuStore.
+Приложение опубликовано в RuStore, релизы с готовым APK — в
+[GitHub Releases](https://github.com/ranepa-unofficial/ranepa-sync-android/releases).
 
 ## Лицензия
 
