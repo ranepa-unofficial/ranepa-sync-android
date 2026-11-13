@@ -11,7 +11,9 @@ set -euo pipefail
 APK=$1
 WHATS_NEW=$2
 PACKAGE=${RUSTORE_PACKAGE:-com.qteb.ranepa.sync}
-API=https://public-api-m.rustore.ru/public
+# public-api-m.rustore.ru из документации подписан российским корнем (НУЦ Минцифры),
+# которого нет на раннерах GitHub; у public-api.rustore.ru — общедоступный сертификат.
+API=https://public-api.rustore.ru/public
 
 work=$(mktemp -d)
 token=
