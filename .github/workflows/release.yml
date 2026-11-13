@@ -1,12 +1,13 @@
 name: Release
 
-# Тег v1.0.0 → подписанные AAB (для Google Play и RuStore) и APK в GitHub Releases.
-# ranepa.apk — то же APK под постоянным именем: на него ведёт «Обновить» в приложении
-# (releases/latest/download/ranepa.apk). Дальше — update.json, см. docs/release.md.
+# Тег v1.0.0 → подписанные AAB (для Google Play) и APK в GitHub Releases и новая
+# версия в RuStore на модерацию. ranepa.apk — то же APK под постоянным именем: на
+# него ведёт «Обновить» в приложении (releases/latest/download/ranepa.apk). Текст
+# «Что нового» для RuStore — сообщение тега: git tag -a v1.2.0 -m "…".
+# Дальше — update.json, см. docs/release.md.
 #
-# Тег v1.2.0-alpha.1 → пре-релиз на GitHub (без ranepa.apk: «последним» он не
-# становится) и альфа-версия в RuStore на модерацию. Текст «Что нового» —
-# сообщение тега: git tag -a v1.2.0-alpha.1 -m "…".
+# Тег v1.2.0-alpha.1 → только пре-релиз на GitHub (без ranepa.apk: «последним» он
+# не становится), в RuStore ничего не уходит.
 on:
   push:
     tags: ["v*"]
@@ -49,8 +50,8 @@ jobs:
             cp app/build/outputs/apk/release/app-release.apk ranepa.apk
             gh release create "$GITHUB_REF_NAME" "ranepa-${GITHUB_REF_NAME}.apk" ranepa.apk "ranepa-${GITHUB_REF_NAME}.aab" --generate-notes
           fi
-      - name: Альфа-версия в RuStore
-        if: env.ALPHA == 'true'
+      - name: Версия в RuStore
+        if: env.ALPHA != 'true'
         env:
           RUSTORE_KEY_ID: ${{ secrets.RUSTORE_KEY_ID }}
           RUSTORE_PRIVATE_KEY: ${{ secrets.RUSTORE_PRIVATE_KEY }}
@@ -58,4 +59,4 @@ jobs:
           # Сообщение есть только у аннотированного тега; у простого — текст по умолчанию.
           git fetch --depth=1 origin "+refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
           notes=$(git for-each-ref "refs/tags/${GITHUB_REF_NAME}" --format='%(if)%(*objectname)%(then)%(contents)%(end)')
-          scripts/rustore-alpha.sh app/build/outputs/apk/release/app-release.apk "${notes:-Альфа-версия ${GITHUB_REF_NAME#v}}"
+          scripts/rustore-release.sh app/build/outputs/apk/release/app-release.apk "${notes:-Версия ${GITHUB_REF_NAME#v}}"
