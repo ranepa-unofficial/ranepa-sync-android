@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Альфа-версия в RuStore через RuStore API: черновик → APK → модерация.
+# Новая версия в RuStore через RuStore API: черновик → APK → модерация.
+# После модерации версия публикуется сразу (publishType INSTANT).
 #
-#   RUSTORE_KEY_ID=… RUSTORE_PRIVATE_KEY=… scripts/rustore-alpha.sh app-release.apk "Что нового"
+#   RUSTORE_KEY_ID=… RUSTORE_PRIVATE_KEY=… scripts/rustore-release.sh app-release.apk "Что нового"
 #
 # Ключ создаётся в консоли RuStore: приложение → API RuStore → «Создать ключ».
-# Параметр альфы в документации к созданию черновика не описан, поэтому после
-# создания черновик проверяется: не альфа — удаляется, на модерацию ничего не уходит.
 set -euo pipefail
 
 APK=$1
@@ -52,16 +51,11 @@ token=$(jq -r .body.jwe <<<"$response")
 
 response=$(curl -sS -X POST "$API/v1/application/$PACKAGE/version" \
     -H "Public-Token: $token" -H 'Content-Type: application/json' \
-    -d "$(jq -n --arg w "$WHATS_NEW" '{whatsNew: $w, testingType: "ALPHA"}')")
+    -d "$(jq -n --arg w "$WHATS_NEW" '{whatsNew: $w, publishType: "INSTANT"}')")
 check "$response" "Черновик"
 version=$(jq -r .body <<<"$response")
 [[ $version =~ ^[0-9]+$ ]] || { version=; fail "Черновик: нет номера версии в ответе: $response"; }
 echo "Черновик $version"
-
-response=$(curl -sS "$API/v2/application/$PACKAGE/version/$version" -H "Public-Token: $token")
-check "$response" "Черновик $version"
-testing=$(jq -r .body.testingType <<<"$response")
-[[ $testing == ALPHA ]] || fail "RuStore создал черновик с testingType=$testing, а не ALPHA — на модерацию ничего не ушло."
 
 response=$(curl -sS -X POST "$API/v1/application/$PACKAGE/version/$version/apk?isMainApk=true" \
     -H "Public-Token: $token" -F "file=@$APK")
@@ -70,4 +64,4 @@ check "$response" "Загрузка APK"
 response=$(curl -sS -X POST "$API/v1/application/$PACKAGE/version/$version/commit" -H "Public-Token: $token")
 check "$response" "Отправка на модерацию"
 committed=true
-echo "Альфа-версия $version отправлена на модерацию"
+echo "Версия $version отправлена на модерацию"
