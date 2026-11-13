@@ -3,6 +3,10 @@ name: Release
 # Тег v1.0.0 → подписанные AAB (для Google Play и RuStore) и APK в GitHub Releases.
 # ranepa.apk — то же APK под постоянным именем: на него ведёт «Обновить» в приложении
 # (releases/latest/download/ranepa.apk). Дальше — update.json, см. docs/release.md.
+#
+# Тег v1.2.0-alpha.1 → пре-релиз на GitHub (без ranepa.apk: «последним» он не
+# становится) и альфа-версия в RuStore на модерацию. Текст «Что нового» —
+# сообщение тега: git tag -a v1.2.0-alpha.1 -m "…".
 on:
   push:
     tags: ["v*"]
@@ -13,6 +17,8 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      ALPHA: ${{ contains(github.ref_name, '-alpha') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -33,7 +39,23 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Перезапуск после ошибки в RuStore: релиз уже есть.
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then exit 0; fi
           cp app/build/outputs/apk/release/app-release.apk "ranepa-${GITHUB_REF_NAME}.apk"
-          cp app/build/outputs/apk/release/app-release.apk ranepa.apk
           cp app/build/outputs/bundle/release/app-release.aab "ranepa-${GITHUB_REF_NAME}.aab"
-          gh release create "$GITHUB_REF_NAME" "ranepa-${GITHUB_REF_NAME}.apk" ranepa.apk "ranepa-${GITHUB_REF_NAME}.aab" --generate-notes
+          if [ "$ALPHA" = true ]; then
+            gh release create "$GITHUB_REF_NAME" "ranepa-${GITHUB_REF_NAME}.apk" "ranepa-${GITHUB_REF_NAME}.aab" --prerelease --generate-notes
+          else
+            cp app/build/outputs/apk/release/app-release.apk ranepa.apk
+            gh release create "$GITHUB_REF_NAME" "ranepa-${GITHUB_REF_NAME}.apk" ranepa.apk "ranepa-${GITHUB_REF_NAME}.aab" --generate-notes
+          fi
+      - name: Альфа-версия в RuStore
+        if: env.ALPHA == 'true'
+        env:
+          RUSTORE_KEY_ID: ${{ secrets.RUSTORE_KEY_ID }}
+          RUSTORE_PRIVATE_KEY: ${{ secrets.RUSTORE_PRIVATE_KEY }}
+        run: |
+          # Сообщение есть только у аннотированного тега; у простого — текст по умолчанию.
+          git fetch --depth=1 origin "+refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+          notes=$(git for-each-ref "refs/tags/${GITHUB_REF_NAME}" --format='%(if)%(*objectname)%(then)%(contents)%(end)')
+          scripts/rustore-alpha.sh app/build/outputs/apk/release/app-release.apk "${notes:-Альфа-версия ${GITHUB_REF_NAME#v}}"
