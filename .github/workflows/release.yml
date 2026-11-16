@@ -4,7 +4,8 @@ name: Release
 # версия в RuStore на модерацию. ranepa.apk — то же APK под постоянным именем: на
 # него ведёт «Обновить» в приложении (releases/latest/download/ranepa.apk). Текст
 # «Что нового» для RuStore — сообщение тега: git tag -a v1.2.0 -m "…".
-# Дальше — update.json, см. docs/release.md.
+# После релиза workflow сам открывает PR с update.json (влить, когда ranepa.apk
+# скачивается), см. docs/release.md.
 #
 # Тег v1.2.0-alpha.1 → только пре-релиз на GitHub (без ranepa.apk: «последним» он
 # не становится), в RuStore ничего не уходит.
@@ -14,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   release:
@@ -50,6 +52,36 @@ jobs:
             cp app/build/outputs/apk/release/app-release.apk ranepa.apk
             gh release create "$GITHUB_REF_NAME" "ranepa-${GITHUB_REF_NAME}.apk" ranepa.apk "ranepa-${GITHUB_REF_NAME}.aab" --generate-notes
           fi
+      - name: PR с update.json
+        if: env.ALPHA != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          code=$(grep -m1 -oE 'versionCode = [0-9]+' app/build.gradle.kts | grep -oE '[0-9]+')
+          branch="update-json-${version}-${code}"
+          # Перезапуск: ветка уже есть — PR открыт раньше.
+          if git ls-remote --exit-code origin "refs/heads/${branch}" >/dev/null; then exit 0; fi
+          git fetch --depth=1 origin "+refs/heads/main:refs/remotes/origin/main" \
+            "+refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+          git switch -c "$branch" origin/main
+          notes=$(git for-each-ref "refs/tags/${GITHUB_REF_NAME}" --format='%(if)%(*objectname)%(then)%(contents)%(end)')
+          VERSION="$version" CODE="$code" NOTES="$notes" python3 - <<'PY'
+          import json, os
+          data = json.load(open("update.json"))
+          gh = data["github"]
+          gh["latest"], gh["latestCode"] = os.environ["VERSION"], int(os.environ["CODE"])
+          if os.environ["NOTES"].strip():
+              gh["notes"] = os.environ["NOTES"].strip()
+          open("update.json", "w").write(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -qam "update.json: ${version} (${code})"
+          git push -q origin "$branch"
+          body="Релиз [${GITHUB_REF_NAME}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${GITHUB_REF_NAME}) опубликован. Влить, когда ranepa.apk скачивается по постоянной ссылке, затем сбросить кэш jsDelivr (docs/release.md)."
+          gh pr create --base main --head "$branch" --title "update.json: ${version} (${code})" --body "$body" \
+            || echo "::warning::Не удалось открыть PR: разреши GitHub Actions создавать PR (Settings → Actions → General) или открой его из ветки ${branch} вручную."
       - name: Версия в RuStore
         if: env.ALPHA != 'true'
         env:
