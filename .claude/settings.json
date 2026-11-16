@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew testDebugUnitTest:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(./gradlew verifyRoborazziDebug:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run watch:*)",
+      "Bash(gh release list:*)",
+      "Bash(gh release view:*)",
+      "Bash(adb devices:*)",
+      "Bash(adb exec-out screencap:*)",
+      "Bash(adb shell uiautomator dump:*)",
+      "Bash(emulator -list-avds)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/no-ai-attribution.sh" }
+        ]
+      }
+    ]
+  }
+}

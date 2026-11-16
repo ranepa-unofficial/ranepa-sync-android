@@ -5,7 +5,7 @@ Kotlin, Jetpack Compose, Material 3, Android 8.0+. Как всё устроен�
 ## Правила
 
 - `main` защищён: всё через PR, вливать `gh pr merge N --squash --admin --delete-branch` только после «ок» пользователя.
-- В коммитах и PR — без Co-Authored-By и любой атрибуции ИИ.
+- В коммитах и PR — без Co-Authored-By и любой атрибуции ИИ (проверяет хук `.claude/hooks/no-ai-attribution.sh`).
 - Репозиторий публичный: `keystore.properties`, `*.jks`, ключи RuStore и `store/**/RELEASE*.md` не коммитить; секреты пользователь задаёт сам.
 - Версию выбирает пользователь, `versionCode` — всегда +1.
 - Новые экраны — сначала прототип и согласование. Тексты — на русском, как в iOS.
@@ -18,5 +18,6 @@ Kotlin, Jetpack Compose, Material 3, Android 8.0+. Как всё устроен�
 |---|---|
 | `android-release` | версия, тег, workflow Release, `update.json`, Google Play |
 | `android-rustore-api` | RuStore API и шаг «Версия в RuStore» |
+| `android-emulator` | эмулятор, демо и «Отладка», скриншоты, анимации, Roborazzi |
 | `android-analytics` | события TelemetryDeck и проверка сигналов |
 | `android-from-ios` | перенос функции из iOS |
