@@ -15,7 +15,7 @@ description: Выпуск Android-версии — PR с versionCode, аннот
    git fetch && git tag -a v1.2.0 origin/main -m "1–3 предложения для пользователей" && git push origin v1.2.0
    ```
 3. **Workflow Release** — следи в фоне: `gh run list --workflow release.yml -L 1`, `gh run watch <id> --exit-status`. Успех RuStore — в логе «Версия N отправлена на модерацию».
-4. **`update.json`** — отдельный PR, только после того как `ranepa.apk` скачивается из релиза. Затем сбрось jsDelivr и проверь ссылку (команды в `docs/release.md`).
+4. **`update.json`** — PR открывает сам workflow («update.json: X.Y.Z (N)»). Проверь `notes`, влей после того как `ranepa.apk` скачивается из релиза, затем сбрось jsDelivr (команды в `docs/release.md`). Если PR не открылся (предупреждение в логе), открой его из ветки `update-json-X.Y.Z-N`.
 5. **Google Play** — AAB из релиза пользователь загружает сам. В консоли магазинов за него не входить.
 6. **Отчёт:** ссылка на релиз, APK, AAB, статус RuStore; если менялись собираемые данные — напомни про формы магазинов (скилл `android-analytics`).
 
